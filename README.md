@@ -69,6 +69,12 @@ cd mouseless-dev
 - GitHub CLI integration
 - Project navigation with fzf
 
+## Documentation
+
+- [User Guide](docs/user-guide.md) - Detailed instructions for using the environment
+- [Training Guide](docs/training-guide.md) - Structured approach to mastering mouseless development
+- [Command Reference](docs/command-reference.md) - Printable cheat sheet of all commands
+
 ## Keybindings
 
 ### Neovim
@@ -83,6 +89,7 @@ cd mouseless-dev
 | `<leader>gs` | Git status             |
 | `<leader>tr` | Run current line in tmux|
 | `<leader>tt` | Run current test file  |
+| `<leader>tn` | Run nearest test       |
 
 ### Tmux
 
@@ -146,6 +153,12 @@ All configuration files are stored in their standard locations:
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Disclaimer
+
+This software is provided "as is", without warranty of any kind, express or implied. The authors or copyright holders shall not be liable for any claim, damages or other liability arising from the use of the software.
+
+This project is a work in progress and may contain bugs or incomplete features. Users are encouraged to report any issues they encounter.
 
 ## Acknowledgements
 
