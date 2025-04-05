@@ -1,5 +1,3 @@
--- Path: ~/.config/nvim/lua/plugins/custom/tmux.lua
-
 local M = {}
 
 -- Function to send command to tmux
@@ -59,17 +57,17 @@ function M.run_test_file()
   local cmd = ""
   
   if filetype == 'ruby' then
-    if filename:match('_spec%.rb) then
+    if filename:match('_spec%.rb$') then
       cmd = "bundle exec rspec " .. filename
-    elseif filename:match('_test%.rb) then
+    elseif filename:match('_test%.rb$') then
       cmd = "bundle exec ruby -Itest " .. filename
     else
       -- Try to find and run the corresponding test file
-      local test_file = filename:gsub('%.rb, '_spec.rb')
+      local test_file = filename:gsub('%.rb$', '_spec.rb')
       if vim.fn.filereadable(test_file) == 1 then
         cmd = "bundle exec rspec " .. test_file
       else
-        test_file = filename:gsub('%.rb, '_test.rb')
+        test_file = filename:gsub('%.rb$', '_test.rb')
         if vim.fn.filereadable(test_file) == 1 then
           cmd = "bundle exec ruby -Itest " .. test_file
         else
@@ -79,11 +77,11 @@ function M.run_test_file()
       end
     end
   elseif filetype == 'python' then
-    if filename:match('test_.+%.py) or filename:match('_test%.py) then
+    if filename:match('test_.+%.py$') or filename:match('_test%.py$') then
       cmd = "python -m pytest " .. filename .. " -v"
     else
       -- Try to find the corresponding test file
-      local test_file = filename:gsub('%.py, '_test.py')
+      local test_file = filename:gsub('%.py$', '_test.py')
       if vim.fn.filereadable(test_file) == 1 then
         cmd = "python -m pytest " .. test_file .. " -v"
       else
@@ -114,16 +112,16 @@ function M.run_nearest_test()
   local cmd = ""
   
   if filetype == 'ruby' then
-    if filename:match('_spec%.rb) then
+    if filename:match('_spec%.rb$') then
       cmd = "bundle exec rspec " .. filename .. ":" .. line_number
-    elseif filename:match('_test%.rb) then
+    elseif filename:match('_test%.rb$') then
       cmd = "bundle exec ruby -Itest " .. filename .. " --name='/test_.\\+_" .. line_number .. "/'"
     else
       print("Not in a test file")
       return
     end
   elseif filetype == 'python' then
-    if filename:match('test_.+%.py) or filename:match('_test%.py) then
+    if filename:match('test_.+%.py$') or filename:match('_test%.py$') then
       cmd = "python -m pytest " .. filename .. "::$(sed -n " .. line_number .. "p " .. filename .. " | grep -o 'def test[a-zA-Z0-9_]\\+' | sed 's/def //')"
     else
       print("Not in a test file")
