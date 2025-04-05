@@ -46,7 +46,7 @@ echo ""
 
 # Create necessary directories
 echo -e "${BLUE}Creating configuration directories...${NC}"
-mkdir -p ~/.config/nvim/lua/{core,plugins/custom,utils}
+mkdir -p ~/.config/nvim/lua/{core,plugins,utils}
 
 # Check for Homebrew installation
 if ! command -v brew &> /dev/null; then
@@ -120,8 +120,6 @@ cp "${CONFIG_DIR}/neovim/init.lua" ~/.config/nvim/
 cp -r "${CONFIG_DIR}/neovim/lua/core/"* ~/.config/nvim/lua/core/
 cp -r "${CONFIG_DIR}/neovim/lua/plugins/"* ~/.config/nvim/lua/plugins/
 cp -r "${CONFIG_DIR}/neovim/lua/utils/"* ~/.config/nvim/lua/utils/
-mkdir -p ~/.config/nvim/lua/plugins/custom
-cp "${CONFIG_DIR}/neovim/lua/plugins/custom/tmux.lua" ~/.config/nvim/lua/plugins/custom/
 
 # Copy Tmux configuration
 echo -e "${BLUE}Installing Tmux configuration...${NC}"
@@ -129,12 +127,12 @@ cp -f "${CONFIG_DIR}/tmux/tmux.conf" ~/.tmux.conf
 
 # Copy Zsh configuration
 echo -e "${BLUE}Installing Zsh configuration...${NC}"
-cp -f "${CONFIG_DIR}/zsh/zshrc" ~/.zshrc
+cp -f "${CONFIG_DIR}/zsh/zshrc.sh" ~/.zshrc
 cp -f "${CONFIG_DIR}/zsh/github-integration.zsh" ~/.github-integration.zsh
 
 # Copy config test script
 echo -e "${BLUE}Installing configuration test script...${NC}"
-cp -f "config_test.sh" ~/config_test.sh
+cp -f "${CONFIG_DIR}/../config_test.sh" ~/config_test.sh
 chmod +x ~/config_test.sh
 
 # Install Neovim plugins
