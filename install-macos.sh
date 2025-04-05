@@ -117,6 +117,11 @@ fi
 # Copy Neovim configuration files
 echo -e "${BLUE}Installing Neovim configuration...${NC}"
 cp "${CONFIG_DIR}/neovim/init.lua" ~/.config/nvim/
+
+# Temporarily modify the init.lua file to disable the colorscheme command until plugins are installed
+sed -i.bak "s/vim.cmd('colorscheme onedark')/-- Colorscheme will be set after plugins are installed\n-- vim.cmd('colorscheme onedark')/" ~/.config/nvim/init.lua
+
+# Copy the rest of the configuration files
 cp -r "${CONFIG_DIR}/neovim/lua/core/"* ~/.config/nvim/lua/core/
 cp -r "${CONFIG_DIR}/neovim/lua/plugins/"* ~/.config/nvim/lua/plugins/
 cp -r "${CONFIG_DIR}/neovim/lua/utils/"* ~/.config/nvim/lua/utils/
@@ -137,7 +142,10 @@ chmod +x ~/config_test.sh
 
 # Install Neovim plugins
 echo -e "${BLUE}Installing Neovim plugins...${NC}"
-nvim --headless "+Lazy! sync" +qa || echo "Plugin installation will complete on first Neovim startup"
+# First ensure the plugin directories exist
+mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy"
+# Then run the plugin installation command with proper syntax
+nvim --headless "+Lazy sync" +qa || echo "Plugin installation will continue on first Neovim startup"
 
 # Install Tmux plugins
 echo -e "${BLUE}Installing Tmux plugins...${NC}"
@@ -153,6 +161,12 @@ fi
 if [ "$SHELL" != "$(which zsh)" ]; then
     echo -e "${BLUE}Setting Zsh as default shell...${NC}"
     chsh -s $(which zsh)
+fi
+
+# Restore the init.lua file to enable colorscheme after plugins are installed
+echo -e "${BLUE}Setting up final configuration...${NC}"
+if [ -f ~/.config/nvim/init.lua.bak ]; then
+    mv ~/.config/nvim/init.lua.bak ~/.config/nvim/init.lua
 fi
 
 # Clean up if downloaded
