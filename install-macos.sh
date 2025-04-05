@@ -114,26 +114,58 @@ else
     echo -e "${BLUE}Lazy.nvim already installed.${NC}"
 fi
 
-# Copy Neovim configuration files
-echo -e "${BLUE}Installing Neovim configuration...${NC}"
-cp "${CONFIG_DIR}/neovim/init.lua" ~/.config/nvim/
+# Create a bootstrap init.lua file to safely install plugins first
+echo -e "${BLUE}Creating bootstrap configuration...${NC}"
 
-# Temporarily modify the init.lua file to disable the colorscheme command until plugins are installed
-sed -i.bak "s/vim.cmd('colorscheme onedark')/-- Colorscheme will be set after plugins are installed\n-- vim.cmd('colorscheme onedark')/" ~/.config/nvim/init.lua
+# Backup the original init.lua if we're running for the first time
+BOOTSTRAP_DONE_MARKER="$HOME/.config/.nvim_bootstrap_done"
+if [ ! -f "$BOOTSTRAP_DONE_MARKER" ]; then
+    if [ -f "$HOME/.config/nvim/init.lua" ]; then
+        echo -e "${BLUE}Backing up existing init.lua...${NC}"
+        cp "$HOME/.config/nvim/init.lua" "$HOME/.config/nvim/init.lua.orig"
+    fi
 
-# Copy the rest of the configuration files
-cp -r "${CONFIG_DIR}/neovim/lua/core/"* ~/.config/nvim/lua/core/
-cp -r "${CONFIG_DIR}/neovim/lua/plugins/"* ~/.config/nvim/lua/plugins/
-cp -r "${CONFIG_DIR}/neovim/lua/utils/"* ~/.config/nvim/lua/utils/
+    # Create a minimal bootstrap init.lua that just loads the plugin manager
+    cat > "$HOME/.config/nvim/init.lua" << 'EOL'
+-- Bootstrap init.lua - Minimal configuration for plugin installation
 
-# Copy Tmux configuration
-echo -e "${BLUE}Installing Tmux configuration...${NC}"
-cp -f "${CONFIG_DIR}/tmux/tmux.conf" ~/.tmux.conf
+-- Set up lazy.nvim plugin manager
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- Load essential plugins only
+require("lazy").setup({
+  { "navarasu/onedark.nvim", priority = 1000 },
+  -- Add other essential plugins here if needed
+})
+
+print("Bootstrap configuration loaded. Plugins are being installed.")
+print("After installation completes, restart Neovim for full configuration.")
+EOL
+fi
+
+# Copy core configuration files
+echo -e "${BLUE}Installing configuration files...${NC}"
+mkdir -p ~/.config/nvim/lua/{core,plugins,utils}
 
 # Copy Zsh configuration
 echo -e "${BLUE}Installing Zsh configuration...${NC}"
 cp -f "${CONFIG_DIR}/zsh/zshrc.sh" ~/.zshrc
 cp -f "${CONFIG_DIR}/zsh/github-integration.zsh" ~/.github-integration.zsh
+
+# Copy Tmux configuration
+echo -e "${BLUE}Installing Tmux configuration...${NC}"
+cp -f "${CONFIG_DIR}/tmux/tmux.conf" ~/.tmux.conf
 
 # Copy config test script
 echo -e "${BLUE}Installing configuration test script...${NC}"
@@ -141,11 +173,31 @@ cp -f "${CONFIG_DIR}/../config_test.sh" ~/config_test.sh
 chmod +x ~/config_test.sh
 
 # Install Neovim plugins
-echo -e "${BLUE}Installing Neovim plugins...${NC}"
-# First ensure the plugin directories exist
-mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy"
-# Then run the plugin installation command with proper syntax
+echo -e "${BLUE}Installing Neovim plugins with the bootstrap configuration...${NC}"
 nvim --headless "+Lazy sync" +qa || echo "Plugin installation will continue on first Neovim startup"
+
+# If the bootstrap just completed successfully, deploy the full configuration
+if [ ! -f "$BOOTSTRAP_DONE_MARKER" ]; then
+    echo -e "${BLUE}Bootstrap completed. Deploying full configuration...${NC}"
+    
+    # Copy all the Neovim configuration files
+    echo -e "${BLUE}Installing full Neovim configuration...${NC}"
+    if [ -f "$HOME/.config/nvim/init.lua.orig" ]; then
+        cp "$HOME/.config/nvim/init.lua.orig" "$HOME/.config/nvim/init.lua"
+        rm "$HOME/.config/nvim/init.lua.orig"
+    else
+        cp "${CONFIG_DIR}/neovim/init.lua" ~/.config/nvim/
+    fi
+    
+    cp -r "${CONFIG_DIR}/neovim/lua/core/"* ~/.config/nvim/lua/core/
+    cp -r "${CONFIG_DIR}/neovim/lua/plugins/"* ~/.config/nvim/lua/plugins/
+    cp -r "${CONFIG_DIR}/neovim/lua/utils/"* ~/.config/nvim/lua/utils/
+    
+    # Create the marker file to indicate bootstrap is done
+    touch "$BOOTSTRAP_DONE_MARKER"
+    
+    echo -e "${GREEN}Full configuration deployed. Plugins should load correctly now.${NC}"
+fi
 
 # Install Tmux plugins
 echo -e "${BLUE}Installing Tmux plugins...${NC}"
@@ -163,12 +215,6 @@ if [ "$SHELL" != "$(which zsh)" ]; then
     chsh -s $(which zsh)
 fi
 
-# Restore the init.lua file to enable colorscheme after plugins are installed
-echo -e "${BLUE}Setting up final configuration...${NC}"
-if [ -f ~/.config/nvim/init.lua.bak ]; then
-    mv ~/.config/nvim/init.lua.bak ~/.config/nvim/init.lua
-fi
-
 # Clean up if downloaded
 if [ "$CLONED_REPO" = false ]; then
     echo -e "${BLUE}Cleaning up temporary files...${NC}"
@@ -184,7 +230,7 @@ echo "To finalize the setup:"
 echo "1. Start a new terminal session or run 'source ~/.zshrc'"
 echo "2. Start Tmux with the command 'tmux'"
 echo "3. Inside Tmux, press Ctrl-a + I to install Tmux plugins"
-echo "4. Open Neovim to automatically install plugins"
+echo "4. Open Neovim to finish installing plugins with the full configuration"
 echo ""
 echo "Run the configuration test with: ~/config_test.sh"
 echo ""
