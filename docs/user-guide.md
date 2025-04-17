@@ -1,6 +1,6 @@
 # Mouseless Development Environment - User Guide
 
-This guide provides detailed instructions for using the mouseless development environment, which combines Neovim, Tmux, and Zsh for a powerful keyboard-driven workflow.
+This guide provides detailed instructions for using the enhanced mouseless development environment, which combines Neovim, Tmux, and Zsh for a powerful keyboard-driven workflow with specialized support for Python, JavaScript, and data analysis.
 
 ## Table of Contents
 
@@ -10,9 +10,10 @@ This guide provides detailed instructions for using the mouseless development en
 4. [Neovim Usage](#neovim-usage)
 5. [Tmux Usage](#tmux-usage)
 6. [Zsh and Terminal Usage](#zsh-and-terminal-usage)
-7. [GitHub Integration](#github-integration)
-8. [Customization](#customization)
-9. [Troubleshooting](#troubleshooting)
+7. [Language-Specific Features](#language-specific-features)
+8. [GitHub Integration](#github-integration)
+9. [Customization](#customization)
+10. [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
@@ -25,6 +26,7 @@ The mouseless development environment is designed to maximize productivity by en
 - **Customizability**: Every component can be tailored to your specific needs
 - **Reduced Strain**: Minimize repetitive mouse movements
 - **Cross-Platform**: Works on both macOS and Linux
+- **Language-Optimized**: Specialized tools for Python, JavaScript, and data analysis
 
 ## Core Components
 
@@ -38,26 +40,35 @@ The environment consists of three primary tools working together:
 
 ### Starting a Development Session
 
-The environment provides a custom command to quickly start a development session:
+The environment provides custom commands to quickly start a development session:
 
 ```sh
+# General development session
 mks project_name
+
+# Python-specific session
+pyks project_name
+
+# From tmux, create specialized sessions with:
+# Prefix + D (Development)
+# Prefix + P (Python)
+# Prefix + J (JavaScript)
+# Prefix + A (Data Analysis)
 ```
 
-This creates a new tmux session with three windows:
-- Window 1: "edit" - For editing code in Neovim
-- Window 2: "test" - For running tests
-- Window 3: "git" - For git operations
+These create new tmux sessions with specialized window layouts for different types of development.
 
-### Project Navigation
-
-To quickly navigate between your projects:
+### Project Creation and Navigation
 
 ```sh
+# Create a new project
+mkproject project_name [python|js|web|data]
+
+# Navigate between projects
 proj
 ```
 
-This command uses fzf to find and select a project from your ~/projects and ~/github directories.
+The `mkproject` command sets up a new project with appropriate structure and files for your chosen technology.
 
 ## Neovim Usage
 
@@ -110,10 +121,43 @@ This command uses fzf to find and select a project from your ~/projects and ~/gi
 
 ### Terminal Integration
 
-- `<leader>t`: Toggle terminal
-- `<leader>tr`: Run current line in tmux
-- `<leader>tt`: Run current test file
-- `<leader>tn`: Run nearest test
+- `<leader>tt`: Toggle terminal
+- `<leader>tf`: Toggle floating terminal
+- `<leader>tv`: Toggle vertical terminal
+- `<leader>th`: Toggle horizontal terminal
+- `<leader>tg`: Toggle lazygit
+- `<leader>tp`: Toggle Python REPL
+- `<leader>tn`: Toggle Node.js REPL
+
+### Language-Specific Commands
+
+#### Python
+- `<leader>pv`: Select Python virtual environment
+- `<leader>pd`: Generate Python docstring
+- `<leader>pt`: Run nearest Python test
+- `<leader>ptf`: Run Python test file
+- `<leader>pr`: Run Python code
+
+#### JavaScript/TypeScript
+- `<leader>jo`: Organize imports
+- `<leader>ja`: Add missing imports
+- `<leader>jf`: Fix all issues
+- `<leader>jt`: Run nearest JavaScript test
+- `<leader>jtf`: Run JavaScript test file
+
+#### Web Development
+- `<leader>wls`: Start live server
+- `<leader>wlx`: Stop live server
+- `<leader>wp`: Start HTML preview
+- `<leader>ws`: Stop HTML preview
+- `<leader>wts`: Sort Tailwind CSS classes
+
+#### Data Analysis
+- `<leader>du`: Toggle database UI
+- `<leader>ds`: Execute SQL query
+- `<leader>mi`: Initialize Magma (Jupyter)
+- `<leader>me`: Evaluate code in Jupyter
+- `<leader>qp`: Preview Quarto document
 
 ## Tmux Usage
 
@@ -127,11 +171,19 @@ This command uses fzf to find and select a project from your ~/projects and ~/gi
 - `tmux ls`: List sessions from terminal
 - `tmux attach -t session_name`: Attach to a session
 
+### Project Templates (New!)
+
+- `Ctrl-a` + `D`: Create development session template
+- `Ctrl-a` + `P`: Create Python project template
+- `Ctrl-a` + `J`: Create JavaScript/Web project template
+- `Ctrl-a` + `A`: Create data analysis project template
+
 ### Window Navigation
 
 - `Ctrl-a` + `0-9`: Switch to window by number
 - `Alt-1` to `Alt-5`: Navigate to window 1-5
 - `Alt-Left/Right` or `Alt-h/l`: Previous/next window
+- `Ctrl-a` + `Space`: Switch to last active window
 
 ### Pane Management
 
@@ -140,6 +192,7 @@ This command uses fzf to find and select a project from your ~/projects and ~/gi
 - `Alt-h/j/k/l`: Navigate between panes
 - `Ctrl-a` + `z`: Zoom pane (toggle fullscreen)
 - `Ctrl-a` + `x`: Close pane
+- `Ctrl-a` + `H/J/K/L`: Resize pane
 
 ### Copy Mode
 
@@ -156,46 +209,138 @@ This command uses fzf to find and select a project from your ~/projects and ~/gi
 - `...`: Go up two directories
 - `proj`: Interactive project navigation with fzf
 
+### Project Management
+
+- `mkproject name type`: Create new project structure
+- `pyvenv`: Create/activate Python virtual environment
+- `mks name`: Create tmux development session
+- `pyks name`: Create Python tmux session
+- `kts name`: Kill tmux session
+
 ### File Operations
 
 - `ll`: List files with details (alias for `ls -la`)
 - `vim` or `vi`: Open Neovim (aliased to `nvim`)
+- `vf`: Find and open file with fzf
+
+### Language-Specific Commands
+
+- `py`: Alias for python
+- `pyv`: Create Python virtual environment
+- `activate`: Activate Python virtual environment
+- `pip-update`: Update all pip packages
+- `npm-update`: Update all npm packages
+- `lsrun`: Run Ruby script with warnings
+- `lstest`: Run Ruby test script
+- `lslint`: Run Rubocop on Ruby files
+- `lsexercise`: Create Launch School exercise files
 
 ### GitHub CLI Integration
 
-- `gh_clone username/repo`: Clone a repository and cd into it
+- `gh_clone username/repo`: Clone and cd into repository
 - `gh_create repo-name "description"`: Create a new repository
 - `gh_commit_push "commit message"`: Commit and push in one command
+- `gh_init_project name type`: Initialize project with GitHub repo
 - `ghpr`: Create a pull request (alias for `gh pr create`)
-- `ghprs`: Check pull request status (alias for `gh pr status`)
+- `ghprs`: Check pull request status
+- `ghprl`: List pull requests
+- `ghis`: GitHub issues commands
+- `ghisc`: Create a GitHub issue
+
+## Language-Specific Features
+
+### Python Development
+
+#### Environment Management
+- Use `pyvenv` to create and activate virtual environments
+- Select Python environments in Neovim with `<leader>pv`
+- Automatic virtual environment activation in tmux sessions
+
+#### Testing and Debugging
+- Run tests with `<leader>pt` (nearest test) or `<leader>ptf` (test file)
+- Debug Python with integrated debugger using `<leader>dpr`
+- Run Python scripts directly with `<leader>pr`
+
+#### Tools and Utilities
+- Generate docstrings with `<leader>pd`
+- Run code in Jupyter notebooks with Jupynium integration
+- Visualize data with integrated plotting tools
+
+### JavaScript Development
+
+#### Project Management
+- Check package versions with `<leader>jns`
+- Update packages with `<leader>jnu`
+- Navigate package.json with enhanced tools
+
+#### Code Quality
+- Organize imports with `<leader>jo`
+- Add missing imports with `<leader>ja`
+- Fix all issues with `<leader>jf`
+- Format with Prettier automatically
+
+#### Testing and Debugging
+- Run tests with `<leader>jt` (nearest test) or `<leader>jtf` (test file)
+- Debug JavaScript with the integrated debugger
+- Set breakpoints with `<leader>jdb`
+
+### Web Development
+
+- Live preview with `<leader>wls` (start) and `<leader>wlx` (stop)
+- HTML preview with `<leader>wp` (start) and `<leader>ws` (stop)
+- Sort Tailwind CSS classes with `<leader>wts`
+- Enhanced HTML/CSS editing with Emmet support
+
+### Data Analysis
+
+- Database UI with `<leader>du`
+- Execute SQL queries with `<leader>ds`
+- Jupyter integration with Magma (`<leader>mi`, `<leader>me`)
+- CSV visualization and editing tools
+- Quarto document preview with `<leader>qp`
 
 ## GitHub Integration
 
 The environment includes custom functions for GitHub operations:
 
-### Cloning Repositories
+### Repository Management
 
 ```sh
+# Clone a repository and set up dependencies
 gh_clone username/repo
-```
 
-This clones the repository and changes to the cloned directory.
-
-### Creating Repositories
-
-```sh
+# Create a new repository with README and .gitignore
 gh_create my-new-repo "Description of the repo"
+
+# Initialize a local project with GitHub repository
+gh_init_project project_name project_type
 ```
 
-This creates a new repository on GitHub, initializes it locally, adds a README with the provided description, and pushes the initial commit.
-
-### Committing and Pushing
+### Development Workflow
 
 ```sh
+# Commit and push in one command
 gh_commit_push "Add new feature"
+
+# Fork a repository and set up upstream
+gh_fork_clone username/repo
+
+# Sync fork with upstream
+gh_sync_fork
 ```
 
-This performs git add, commit, and push in a single command.
+### Pull Requests and Issues
+
+```sh
+# Create a PR with reviewers
+gh_create_pr "Title" "Description" "reviewer1,reviewer2"
+
+# Search through issues
+gh_search_issues "search term"
+
+# Launch School specific
+ls_submit_assignment "assignment_name"
+```
 
 ## Customization
 
@@ -205,6 +350,7 @@ All configuration files are stored in their standard locations:
 - Tmux: `~/.tmux.conf`
 - Zsh: `~/.zshrc`
 - GitHub integration: `~/.github-integration.zsh`
+- Alacritty: `~/.config/alacritty/alacritty.yml`
 
 ### Common Customizations
 
@@ -258,7 +404,27 @@ source ~/.zshrc
 
 #### Terminal Colors Not Displaying Correctly
 
-Make sure your terminal supports 256 colors. For iTerm2 or terminal app, check the terminal preferences to ensure "xterm-256color" is selected.
+Make sure your terminal supports 256 colors and true color. For Alacritty or iTerm2, check the configuration to ensure proper color support is enabled.
+
+#### Python Environment Issues
+
+If virtual environment detection isn't working:
+
+```sh
+# Manually activate the environment
+source .venv/bin/activate
+# Then in Neovim
+:VenvSelect
+```
+
+#### JavaScript/TypeScript LSP Not Working
+
+Reinstall the TypeScript language server:
+
+```sh
+:Mason
+# Find and install typescript-language-server
+```
 
 ### Getting Help
 
@@ -269,4 +435,4 @@ For more detailed information on each tool:
 
 ---
 
-This user guide should help you get started with your mouseless development environment. As you become more familiar with the tools, you'll discover additional features and shortcuts to further enhance your workflow.
+This user guide should help you get started with your enhanced mouseless development environment. As you become more familiar with the tools, you'll discover additional features and shortcuts to further enhance your workflow.

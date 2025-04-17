@@ -1,0 +1,144 @@
+# Alacritty configuration for mouseless development environment
+
+# Window settings
+window:
+  padding:
+    x: 8
+    y: 8
+  dynamic_padding: true
+  decorations: full
+  title: Alacritty
+  class:
+    instance: Alacritty
+    general: Alacritty
+  opacity: 1.0
+
+# Scrolling
+scrolling:
+  history: 10000
+  multiplier: 3
+
+# Font configuration
+font:
+  normal:
+    family: "JetBrainsMono Nerd Font"
+    style: Regular
+  bold:
+    family: "JetBrainsMono Nerd Font"
+    style: Bold
+  italic:
+    family: "JetBrainsMono Nerd Font"
+    style: Italic
+  bold_italic:
+    family: "JetBrainsMono Nerd Font"
+    style: Bold Italic
+  size: 12.0
+  offset:
+    x: 0
+    y: 0
+  glyph_offset:
+    x: 0
+    y: 0
+  builtin_box_drawing: true
+
+# Bell
+bell:
+  animation: EaseOutExpo
+  duration: 0
+  color: '0xffffff'
+
+# Terminal cursor
+cursor:
+  style:
+    shape: Block
+    blinking: On
+  vi_mode_style:
+    shape: Beam
+  blink_interval: 750
+  unfocused_hollow: true
+  thickness: 0.15
+
+# Live config reload
+live_config_reload: true
+
+# Key bindings
+key_bindings:
+  - { key: V,         mods: Control|Shift,  action: Paste         }
+  - { key: C,         mods: Control|Shift,  action: Copy          }
+  - { key: Insert,    mods: Shift,          action: PasteSelection}
+  - { key: Key0,      mods: Control,        action: ResetFontSize }
+  - { key: Equals,    mods: Control,        action: IncreaseFontSize }
+  - { key: Minus,     mods: Control,        action: DecreaseFontSize }
+  - { key: F11,       mods: None,           action: ToggleFullscreen }
+  - { key: L,         mods: Control,        action: ClearLogNotice }
+  - { key: L,         mods: Control,        chars: "\x0c"          }
+  - { key: T,         mods: Command,        chars: "\x02c"        }  # tmux: new window
+  - { key: W,         mods: Command,        chars: "\x02x"        }  # tmux: kill pane
+  - { key: D,         mods: Command,        chars: "\x02%"        }  # tmux: split vertically
+  - { key: D,         mods: Command|Shift,  chars: "\x02\""       }  # tmux: split horizontally
+  - { key: N,         mods: Command,        action: SpawnNewInstance }
+  - { key: F,         mods: Command|Control,chars: "\x02["        }  # tmux: enter copy mode
+  - { key: Left,      mods: Command,        chars: "\x02p"        }  # tmux: previous window
+  - { key: Right,     mods: Command,        chars: "\x02n"        }  # tmux: next window
+  - { key: Up,        mods: Command,        chars: "\x02{"        }  # tmux: swap pane up
+  - { key: Down,      mods: Command,        chars: "\x02}"        }  # tmux: swap pane down
+
+# Mouse settings
+mouse:
+  double_click: { threshold: 300 }
+  triple_click: { threshold: 300 }
+  hide_when_typing: false
+
+# Selection settings
+selection:
+  semantic_escape_chars: ",│`|:\"' ()[]{}<>"
+  save_to_clipboard: true
+
+# Mouse bindings
+mouse_bindings:
+  - { mouse: Middle, action: PasteSelection }
+
+# OneDark color scheme
+colors:
+  # Default colors
+  primary:
+    background: '#282c34'
+    foreground: '#abb2bf'
+
+  # Normal colors
+  normal:
+    black:   '#282c34'
+    red:     '#e06c75'
+    green:   '#98c379'
+    yellow:  '#e5c07b'
+    blue:    '#61afef'
+    magenta: '#c678dd'
+    cyan:    '#56b6c2'
+    white:   '#abb2bf'
+
+  # Bright colors
+  bright:
+    black:   '#5c6370'
+    red:     '#e06c75'
+    green:   '#98c379'
+    yellow:  '#e5c07b'
+    blue:    '#61afef'
+    magenta: '#c678dd'
+    cyan:    '#56b6c2'
+    white:   '#ffffff'
+
+  indexed_colors:
+    - { index: 16, color: '#d19a66' }
+    - { index: 17, color: '#be5046' }
+    - { index: 18, color: '#353b45' }
+    - { index: 19, color: '#3e4451' }
+    - { index: 20, color: '#565c64' }
+    - { index: 21, color: '#b6bdca' }
+
+# Shell configuration
+shell:
+  program: /usr/bin/zsh
+  args:
+    - -l
+    - -c
+    - "tmux attach || tmux new-session -s main"

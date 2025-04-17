@@ -1,6 +1,6 @@
 # Mouseless Development Environment
 
-A comprehensive development environment optimized for keyboard-only workflows, featuring Neovim, Tmux, and Zsh.
+A comprehensive development environment optimized for keyboard-only workflows, featuring Neovim, Tmux, and Zsh with enhanced support for Python, JavaScript, Ruby, and data analysis.
 
 ## Core Philosophy
 
@@ -12,11 +12,19 @@ A comprehensive development environment optimized for keyboard-only workflows, f
 
 ## Features
 
+### Core Tools
 - Neovim configuration with LSP, Treesitter, Telescope, and more
 - Tmux setup with sensible defaults and plugins
 - Zsh configuration with plugins and useful aliases
 - GitHub CLI integration
 - Cross-platform support (macOS and Linux)
+
+### Language-Specific Support
+- **Python**: Virtual environments, testing, debugging, docstring generation, and data analysis tools
+- **JavaScript/TypeScript**: Type hints, testing, package management, and debugging
+- **Ruby**: Rails navigation, RSpec/Minitest integration, Launch School support
+- **Web Development**: HTML/CSS tools, live preview, Tailwind integration
+- **Data Analysis**: DataFrame visualizations, SQL integration, Jupyter notebook support
 
 ## Quick Installation
 
@@ -53,14 +61,18 @@ cd mouseless-dev
 - File explorer with nvim-tree
 - Git integration with gitsigns and fugitive
 - Terminal with toggleterm
-- And more...
+- Language-specific plugins for Python, JavaScript, Ruby, and data analysis
+- Enhanced code completion with nvim-cmp
+- AI-powered assistance with Copilot and Tabnine
 
 ### Tmux
 
 - Prefix key set to Ctrl-a
 - Pane navigation with Alt-hjkl
-- Smart session management with tmux-resurrect and tmux-continuum
+- Project-specific session templates
+- Session persistence with tmux-resurrect and tmux-continuum
 - Copy to system clipboard with tmux-yank
+- Enhanced status bar with project information
 
 ### Zsh
 
@@ -68,12 +80,19 @@ cd mouseless-dev
 - Useful aliases and functions
 - GitHub CLI integration
 - Project navigation with fzf
+- Language-specific workflow helpers
+- Launch School specific functions
 
 ## Documentation
 
+- [Getting Started](docs/getting-started.md) - Quick start guide for new users
 - [User Guide](docs/user-guide.md) - Detailed instructions for using the environment
 - [Training Guide](docs/training-guide.md) - Structured approach to mastering mouseless development
 - [Command Reference](docs/command-reference.md) - Printable cheat sheet of all commands
+- **Language Guides**:
+  - [Python Development](docs/language-guides/python-development.md)
+  - [JavaScript Development](docs/language-guides/javascript-development.md)
+  - [Ruby Development](docs/language-guides/ruby-development.md)
 
 ## Keybindings
 
@@ -90,6 +109,9 @@ cd mouseless-dev
 | `<leader>tr` | Run current line in tmux|
 | `<leader>tt` | Run current test file  |
 | `<leader>tn` | Run nearest test       |
+| `<leader>pv` | Select Python venv     |
+| `<leader>jo` | Organize JS imports    |
+| `<leader>ra` | Rails alternate file   |
 
 ### Tmux
 
@@ -101,6 +123,9 @@ cd mouseless-dev
 | `prefix -`  | Split pane horizontally|
 | `prefix r`  | Reload config          |
 | `Alt-[1-5]` | Navigate to window     |
+| `prefix D`  | Create dev session     |
+| `prefix P`  | Create Python session  |
+| `prefix J`  | Create JS session      |
 
 ## Workflow Examples
 
@@ -109,18 +134,50 @@ cd mouseless-dev
 ```bash
 # Create and start a named tmux session
 mks project_name
+
+# Create a Python-specific tmux session
+pyks project_name
 ```
 
-This creates a new tmux session with 3 windows:
-- Window 1: "edit" - For editing code
-- Window 2: "test" - For running tests
-- Window 3: "git" - For git operations
-
-### Project Navigation
+### Python Development
 
 ```bash
-# Navigate to a project using fzf
-proj
+# Create a Python project
+mkproject myproject python
+
+# Activate virtual environment
+pyvenv
+
+# Run tests
+<leader>tt  # Run test file
+<leader>tn  # Run nearest test
+```
+
+### JavaScript Development
+
+```bash
+# Create a JavaScript project
+mkproject myapp js
+
+# Run tests
+<leader>jt  # Run test file
+
+# Fix code issues
+<leader>jf  # Fix all issues
+```
+
+### Ruby Development
+
+```bash
+# Create a Ruby project
+mkproject myproject ruby
+
+# Create a Launch School exercise
+lsexercise exercise_name
+
+# Run tests
+<leader>rt   # Run test (RSpec/Minitest)
+<leader>lst  # Run Launch School test
 ```
 
 ### GitHub Workflow
@@ -136,12 +193,6 @@ gh_create my-new-repo "Description of the repo"
 gh_commit_push "Add new feature"
 ```
 
-### Running Tests in Tmux
-
-1. Open a file in Neovim
-2. Press `<leader>tt` to run the entire test file
-3. Press `<leader>tn` to run the test nearest to cursor
-
 ## Customization
 
 All configuration files are stored in their standard locations:
@@ -149,6 +200,8 @@ All configuration files are stored in their standard locations:
 - Neovim: `~/.config/nvim/`
 - Tmux: `~/.tmux.conf`
 - Zsh: `~/.zshrc`
+- GitHub integration: `~/.github-integration.zsh`
+- Alacritty: `~/.config/alacritty/alacritty.yml`
 
 ## Contributing
 
@@ -167,4 +220,4 @@ This project was developed with assistance from Anthropic's Claude AI assistant,
 - Code structure suggestions
 - Troubleshooting and debugging assistance
 
-Claude was used as a development aid while all final implementation decisions and code review were performed by the human developer.
+Claude was used as a development aid while all final implementation decisions and code review were performed by Joshua Michael Hall. 

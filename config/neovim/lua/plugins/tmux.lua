@@ -1,3 +1,5 @@
+-- Enhanced tmux integration for Neovim
+
 local M = {}
 
 -- Function to send command to tmux
@@ -95,7 +97,23 @@ function M.run_test_file()
       end
     end
   elseif filetype == 'javascript' or filetype == 'typescript' or filetype == 'javascriptreact' or filetype == 'typescriptreact' then
-    cmd = "npm test -- " .. filename
+    if filename:match('%.spec%.[jt]s') or filename:match('%.test%.[jt]s') then
+      cmd = "npm test -- " .. filename
+    else
+      -- Try to find the corresponding test file
+      local test_file = filename:gsub('%.[jt]s$', '.spec.%1')
+      if vim.fn.filereadable(test_file) == 1 then
+        cmd = "npm test -- " .. test_file
+      else
+        test_file = filename:gsub('%.[jt]s$', '.test.%1')
+        if vim.fn.filereadable(test_file) == 1 then
+          cmd = "npm test -- " .. test_file
+        else
+          print("No test file found for " .. filename)
+          return
+        end
+      end
+    end
   else
     print("Running tests not supported for filetype: " .. filetype)
     return
@@ -122,15 +140,84 @@ function M.run_nearest_test()
     end
   elseif filetype == 'python' then
     if filename:match('test_.+%.py$') or filename:match('_test%.py$') then
-      cmd = "python -m pytest " .. filename .. "::$(sed -n " .. line_number .. "p " .. filename .. " | grep -o 'def test[a-zA-Z0-9_]\\+' | sed 's/def //')"
+      -- Try to get the test name from the current line or above
+      local test_line = line_number
+      local test_name = nil
+      
+      while test_line > 0 and test_name == nil do
+        local line = vim.fn.getline(test_line)
+        local match = line:match('def%s+(test_[%w_]+)')
+        if match then
+          test_name = match
+          break
+        end
+        test_line = test_line - 1
+      end
+      
+      if test_name then
+        cmd = "python -m pytest " .. filename .. "::" .. test_name .. " -v"
+      else
+        print("No test function found near line " .. line_number)
+        return
+      end
     else
       print("Not in a test file")
       return
     end
   elseif filetype == 'javascript' or filetype == 'typescript' or filetype == 'javascriptreact' or filetype == 'typescriptreact' then
-    cmd = "npm test -- " .. filename .. " -t \"$(sed -n " .. line_number .. "p " .. filename .. " | grep -o 'test(\\'[^']*\\'' | sed 's/test(\\'//')\""
+    -- Look for the closest test or describe block
+    local test_line = line_number
+    local test_name = nil
+    
+    while test_line > 0 and test_name == nil do
+      local line = vim.fn.getline(test_line)
+      local match = line:match('it%s*%([\'"](.-)[\'"]')
+      if match then
+        test_name = match
+        break
+      end
+      
+      match = line:match('describe%s*%([\'"](.-)[\'"]')
+      if match then
+        test_name = match
+        break
+      end
+      
+      test_line = test_line - 1
+    end
+    
+    if test_name then
+      cmd = "npm test -- " .. filename .. " -t \"" .. test_name .. "\""
+    else
+      print("No test or describe block found near line " .. line_number)
+      return
+    end
   else
     print("Running nearest test not supported for filetype: " .. filetype)
+    return
+  end
+  
+  M.send_to_tmux(cmd)
+end
+
+-- Function to run the current file
+function M.run_current_file()
+  local filetype = vim.bo.filetype
+  local filename = vim.fn.expand('%:p')
+  local cmd = ""
+  
+  if filetype == 'ruby' then
+    cmd = "ruby " .. filename
+  elseif filetype == 'python' then
+    cmd = "python " .. filename
+  elseif filetype == 'javascript' or filetype == 'typescript' then
+    cmd = "node " .. filename
+  elseif filetype == 'sh' or filetype == 'bash' or filetype == 'zsh' then
+    cmd = "bash " .. filename
+  elseif filetype == 'lua' then
+    cmd = "lua " .. filename
+  else
+    print("Running not supported for filetype: " .. filetype)
     return
   end
   
@@ -158,7 +245,18 @@ end
 
 -- Function to attach to a tmux session
 function M.attach_session()
-  local sessions = vim.fn.systemlist("tmux list-sessions -F '#S'")
+  local sessions_output = vim.fn.system("tmux list-sessions -F '#S'")
+  local sessions = {}
+  
+  for session in sessions_output:gmatch("([^\n]+)") do
+    table.insert(sessions, session)
+  end
+  
+  if #sessions == 0 then
+    print("No tmux sessions found")
+    return
+  end
+  
   local session_list = ""
   
   for i, session in ipairs(sessions) do
@@ -173,30 +271,40 @@ function M.attach_session()
   end
 end
 
--- Set up keymaps
-function M.setup_keymaps()
-  local keymap = vim.keymap.set
-  
-  -- Run commands in tmux
-  keymap("n", "<leader>tr", function() M.run_selection_or_line() end, { desc = "Run current line in tmux" })
-  keymap("v", "<leader>tr", function() M.run_selection_or_line() end, { desc = "Run selection in tmux" })
-  
-  -- Run tests
-  keymap("n", "<leader>tt", function() M.run_test_file() end, { desc = "Run current test file" })
-  keymap("n", "<leader>tn", function() M.run_nearest_test() end, { desc = "Run nearest test" })
-  
-  -- Tmux window/session management
-  keymap("n", "<leader>tw", function() M.create_window() end, { desc = "Create new tmux window" })
-  keymap("n", "<leader>ts", function() M.create_session() end, { desc = "Create new tmux session" })
-  keymap("n", "<leader>ta", function() M.attach_session() end, { desc = "Attach to tmux session" })
+-- Function to list tmux sessions
+function M.list_sessions()
+  local sessions_output = vim.fn.system("tmux list-sessions")
+  print(sessions_output)
 end
 
--- Initialize the module
+-- Function to setup tmux integration
 function M.setup()
   -- Only setup if we're running inside tmux
   if vim.fn.exists('$TMUX') == 1 then
-    M.setup_keymaps()
+    vim.keymap.set("n", "<leader>tr", function() M.run_selection_or_line() end, { desc = "Run current line in tmux" })
+    vim.keymap.set("v", "<leader>tr", function() M.run_selection_or_line() end, { desc = "Run selection in tmux" })
+    vim.keymap.set("n", "<leader>tf", function() M.run_current_file() end, { desc = "Run current file" })
+    vim.keymap.set("n", "<leader>tt", function() M.run_test_file() end, { desc = "Run current test file" })
+    vim.keymap.set("n", "<leader>tn", function() M.run_nearest_test() end, { desc = "Run nearest test" })
+    vim.keymap.set("n", "<leader>tw", function() M.create_window() end, { desc = "Create new tmux window" })
+    vim.keymap.set("n", "<leader>tW", function() M.create_window(vim.fn.input("Window name: ")) end, { desc = "Create named tmux window" })
+    vim.keymap.set("n", "<leader>ts", function() M.create_session() end, { desc = "Create new tmux session" })
+    vim.keymap.set("n", "<leader>ta", function() M.attach_session() end, { desc = "Attach to tmux session" })
+    vim.keymap.set("n", "<leader>tl", function() M.list_sessions() end, { desc = "List tmux sessions" })
+    
+    -- Display a message
+    print("Tmux integration enabled")
   end
 end
 
-return M
+-- Set this up as a Neovim plugin
+return {
+  "christoomey/vim-tmux-navigator",
+  lazy = false,
+  config = function()
+    -- Set up tmux integration if we're in tmux
+    if vim.fn.exists('$TMUX') == 1 then
+      M.setup()
+    end
+  end,
+}
